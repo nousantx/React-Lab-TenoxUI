@@ -2,6 +2,11 @@
 
 import property from "./property.js";
 // Define a constructor function
+function tenoxcss(element) {
+  this.element = element;
+  // { {class-name} : ['class-property'] }
+  this.styles = property;
+}
 export default function TenoxUI() {
   let Classes = Object.keys(property).map(
     (className) => `[class*="${className}-"]`
@@ -9,11 +14,6 @@ export default function TenoxUI() {
   // Merge all `Classes` into one selector. Example : '[class*="p-"]', '[class*="m-"]', '[class*="justify-"]'
   let AllClasses = document.querySelectorAll(Classes.join(", "));
   // Style Declare
-  function tenoxcss(element) {
-    this.element = element;
-    // { {class-name} : ['class-property'] }
-    this.styles = property;
-  }
 
   tenoxcss.prototype.applyStyle = function (type, value, unit) {
     const properties = this.styles[type];

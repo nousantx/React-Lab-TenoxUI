@@ -1,20 +1,22 @@
-import { useEffect } from "react";
-import TenoxUI, { Color } from "./TenoxUI";
-
-import "./App.css";
+// import { useEffect } from "react";
+// TenoxUI Styler
+import Styler from "./Style";
+import Navbar from "./component/Navbar";
 
 function App() {
-  useEffect(() => {
-    Color();
-    TenoxUI();
-    // console.log(Color);
-  }, []);
+  Styler();
+  console.log(Styler);
+
   return (
-    <div className="ph-10% pv-0.5rem bg-0d0d0d display-flex flex-parent-center">
-      <h1 className="fs-1rem mv-1rem tc-white ">Tenox</h1>
-      <h1 className="fs-1rem mv-1rem tc-[primary] ">UI</h1>
-      <h1 className="fs-1rem mv-1rem tc-white mh-1rem">x</h1>
-      <h1 className="fs-1rem mv-1rem tc-cyan">ReactJS</h1>
+    <div className="pt-4rem">
+      <Navbar />
+
+      <div className="wrapper bg-0d0d0d fx-ctr">
+        <h1 className="tc-white ">Tenox</h1>
+        <h1 className="tc-[primary] ">UI</h1>
+        <h1 className="tc-white mh-1rem">x</h1>
+        <h1 className="tc-cyan">ReactJS</h1>
+      </div>
     </div>
   );
 }

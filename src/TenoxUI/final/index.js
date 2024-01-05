@@ -1,94 +1,54 @@
 // tenoxcss.js
 
-let AllProperty = {
-  p: ["padding"],
-  pb: ["paddingBottom"],
-  pl: ["paddingLeft"],
-  pr: ["paddingRight"],
-  pt: ["paddingTop"],
-  m: ["margin"],
-  mt: ["marginTop"],
-  mb: ["marginBottom"],
-  mr: ["marginRight"],
-  ml: ["marginLeft"],
-  fs: ["fontSize"],
-  fw: ["fontWeight"],
-  z: ["zIndex"],
-  t: ["top"],
-  b: ["bottom"],
-  r: ["right"],
-  l: ["left"],
-  br: ["borderRadius"],
-  bw: ["borderWidth"],
-  "bw-left": ["borderLeftWidth"],
-  "bw-right": ["borderRightWidth"],
-  "bw-top": ["borderTopWidth"],
-  "bw-bottom": ["borderBottomWidth"],
-  w: ["width"],
-  "w-mx": ["maxWidth"],
-  "w-mn": ["minWidth"],
-  h: ["height"],
-  "h-mx": ["maxHeight"],
-  "h-mn": ["minHeight"],
-  fx: ["flex"],
-  gap: ["gap"],
-  ti: ["textIndent"],
-  "backdrop-blur": ["backdropFilter"],
-  ph: ["paddingLeft", "paddingRight"],
-  pv: ["paddingTop", "paddingBottom"],
-  mv: ["marginTop", "marginBottom"],
-  mh: ["marginLeft", "marginRight"],
-  "text-space": ["letterSpacing"],
-  "word-space": ["wordSpacing"],
-  "line-height": ["lineHeight"],
-  "radius-tl": ["borderTopLeftRadius"],
-  "radius-tr": ["borderTopRightRadius"],
-  "radius-bl": ["borderBottomLeftRadius"],
-  "radius-br": ["borderBottomRightRadius"],
-  "radius-top": ["borderTopLeftRadius", "borderTopRightRadius"],
-  "radius-bottom": ["borderBottomLeftRadius", "borderBottomRightRadius"],
-  "radius-left": ["borderTopLeftRadius", "borderBottomLeftRadius"],
-  "radius-right": ["borderTopRightRadius", "borderBottomRightRadius"],
-  opa: ["opacity"],
-  filter: ["filter"],
-  blur: ["filter"],
-  brightness: ["filter"],
-  contrast: ["filter"],
-  grayscale: ["filter"],
-  "hue-rotate": ["filter"],
-  saturate: ["filter"],
-  sepia: ["filter"],
-};
-
+import property from "../property.js";
 // Define a constructor function
-function TenoxUI() {
-  let Classes = [
-    '[class*="p-"], [class*="pt-"], [class*="pb-"], [class*="pr-"], [class*="pl-"], [class*="m-"], [class*="mt-"], [class*="mb-"], [class*="mr-"], [class*="ml-"], [class*="fs-"], [class*="fw-"], [class*="z-"], [class*="t-"], [class*="b-"], [class*="r-"], [class*="l-"], [class*="br-"], [class*="bw-"], [class*="w-"], [class*="w-mx-"], [class*="w-mn-"], [class*="h-"], [class*="h-mx-"], [class*="h-mn-"], [class*="fx-"], [class*="gap-"], [class*="ti-"], [class*="rt-"], [class*="backdrop-blur-"], [class*="ph-"], [class*="pv-"], [class*="mv-"], [class*="mh-"], [class*="text-space-"], [class*="word-space-"], [class*="line-height-"], [class*="radius-tl-"], [class*="radius-tr-"], [class*="radius-bl-"], [class*="radius-br-"], [class*="radius-top-"], [class*="radius-bottom-"], [class*="radius-left-"], [class*="radius-right-"], [class*="radius-top-"], [class*="radius-bottom-"], [class*="radius-left-"], [class*="radius-right-"], [class*="gs-"], [class*="blur-"], [class*="opa-"], [class*="x-"], [class*="bw-left-"], [class*="bw-right-"], [class*="bw-top-"], [class*="bw-bottom-"], [class*="scale-"], [class*="filter-"], [class*="brightness-"], [class*="sepia-"], [class*="grayscale-"], [class*="contrast-"], [class*="saturate-"], [class*="hue-rotate-"]',
-  ];
-
+export default function TenoxUI() {
+  let Classes = Object.keys(property).map(
+    (className) => `[class*="${className}-"]`
+  );
+  // Merge all `Classes` into one selector. Example : '[class*="p-"]', '[class*="m-"]', '[class*="justify-"]'
   let AllClasses = document.querySelectorAll(Classes.join(", "));
-
   // Style Declare
   function tenoxcss(element) {
     this.element = element;
     // { {class-name} : ['class-property'] }
-    this.styles = AllProperty;
+    this.styles = property;
   }
 
   tenoxcss.prototype.applyStyle = function (type, value, unit) {
     const properties = this.styles[type];
-
     if (properties) {
       properties.forEach((property) => {
+        // Filter Custom Property
         if (property === "filter") {
-          // Check if the filter property is already set
           const existingFilter = this.element.style[property];
-          // Concatenate the new filter value with the existing value
           this.element.style[property] = existingFilter
             ? `${existingFilter} ${type}(${value}${unit})`
             : `${type}(${value}${unit})`;
-        } else if (property === "flex") {
+        }
+        // Make custom property for flex
+        else if (property === "flex") {
           this.element.style[property] = `1 1 ${value}${unit}`;
+        }
+        // Grid System Property
+        else if (
+          property === "gridRow" ||
+          property === "gridColumn" ||
+          property === "gridRowStart" ||
+          property === "gridColumnStart" ||
+          property === "gridRowEnd" ||
+          property === "gridColumnEnd"
+        ) {
+          this.element.style[property] = `span ${value}${unit}`;
+        } else if (type === "grid-row" || type === "grid-col") {
+          this.element.style[property] = `repeat(${value}${unit}, 1fr))`;
+        } else if (type === "auto-grid-row" || type === "auto-grid-col") {
+          this.element.style[
+            property
+          ] = `repeat(auto-fit, minmax(${value}${unit}, 1fr))`;
+        } else if (value.startsWith("[") && value.endsWith("]")) {
+          const cssVariable = value.slice(1, -1);
+          this.element.style[property] = `var(--${cssVariable})`;
         } else {
           this.element.style[property] = `${value}${unit}`;
         }
@@ -98,7 +58,9 @@ function TenoxUI() {
 
   tenoxcss.prototype.applyStyles = function (className) {
     // Matching all class with all possible Value
-    const match = className.match(/([a-zA-Z]+)-(-?\d+(\.\d+)?)([a-zA-Z]*)/);
+    const match = className.match(
+      /([a-zA-Z]+(?:-[a-zA-Z]+)*)-(-?(?:\d+(\.\d+)?)|(?:[a-zA-Z]+(?:-[a-zA-Z]+)*(?:-[a-zA-Z]+)*)|(?:\[[^\]]+\]))([a-zA-Z%]*)/
+    );
     if (match) {
       // type = property class
       const type = match[1];
@@ -118,18 +80,40 @@ function TenoxUI() {
     });
   });
 }
-function CustomTenox(name, values) {
+
+function newProp(name, values) {
+  if (typeof name !== "string" || !Array.isArray(values)) {
+    console.warn(
+      "Invalid arguments for newProp. Please provide a string for name and an array for values."
+    );
+    return;
+  }
   this[name] = values;
-  //   Classes.push(`[class*="${name}-"]`);
-  //   AllClasses = document.querySelectorAll(Classes.join(", "));
+  // Classes.push(`[class*="${name}-"]`);
+  // AllClasses = document.querySelectorAll(Classes.join(", "));
 }
 
-// Add a method to the prototype of CustomTenox to merge it with AllProperty
-CustomTenox.prototype.NewTenox = function () {
-  Object.assign(AllProperty, this);
+newProp.prototype.tryAdd = function () {
+  if (!this || Object.keys(this).length === 0) {
+    console.warn("Invalid newProp instance:", this);
+    return;
+  }
+  Object.assign(property, this);
 };
 
-function Color() {
+export function makeProp(Types, Property) {
+  // Check if 'Types' is a string
+  if (typeof Types !== "string") {
+    throw new Error("Types must be a string");
+  }
+  // Check if 'Property' is an array
+  if (!Array.isArray(Property)) {
+    throw new Error("Property must be an array");
+  }
+  new newProp(Types, Property).tryAdd();
+}
+
+export function Color() {
   const makeColor = (element, pattern, property, format) => {
     // Match the class name against the provided pattern
     const match = element.className.match(pattern);
@@ -174,4 +158,3 @@ function Color() {
 }
 Color();
 TenoxUI();
-export { TenoxUI, CustomTenox, AllProperty, Color };
