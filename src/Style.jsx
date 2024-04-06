@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import tenoxui, {
   moreColor,
   // makeStyle,
@@ -8,7 +8,7 @@ import tenoxui, {
 } from "./tui/tui";
 
 const Styler = () => {
-  useEffect(() => {
+  useLayoutEffect(() => {
     // Make your custom property and type
     defineProps({
       dis: ["display"],
